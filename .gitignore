@@ -1,0 +1,23 @@
+# Build outputs: make in jit\ and host\, the SDK's build of the test apps.
+build/
+build-*/
+bin/
+obj/
+jit/xclrjit.dll
+host/ngenhost.xex
+*.elf
+*.o
+
+# Run artifacts.
+xenia.log
+xenia.png
+__pycache__/
+codecache/CLRCodeCachedll_0.xex
+work/
+# Written by tools\Configure.ps1.
+config.json
+config.mk
+config.props
+xenia.stall.log
+xenia.error.log
+xenia.error.png

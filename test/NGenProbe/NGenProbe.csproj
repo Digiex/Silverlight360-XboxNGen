@@ -1,0 +1,39 @@
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- tools\Configure.ps1 records the Silverlight360 SDK's place here. -->
+  <Import Project="..\..\config.props" Condition="Exists('..\..\config.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7A1C3E55-2B9D-4F60-8E21-5D7C9A0B1E42}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NGenProbe</RootNamespace>
+    <AssemblyName>NGenProbe</AssemblyName>
+    <SilverlightAppEntry>NGenProbe.App</SilverlightAppEntry>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <!-- The Silverlight360 SDK (github.com/Digiex/Silverlight360): where config.props, a property or an
+         environment variable says, else a checkout beside this repository. -->
+    <Silverlight360Dir Condition=" '$(Silverlight360Dir)' == '' ">$(MSBuildThisFileDirectory)..\..\..\Silverlight360\</Silverlight360Dir>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
+    <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
+    <Compile Include="Probe.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Silverlight360Dir)samples\Common\DebugLog.cs"><Link>Common\DebugLog.cs</Link></Compile>
+  </ItemGroup>
+  <Import Project="$(Silverlight360Dir)msbuild\XboxSilverlight.targets" />
+</Project>

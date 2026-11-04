@@ -1,0 +1,42 @@
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- tools\Configure.ps1 records the Silverlight360 SDK's place here. -->
+  <Import Project="..\..\config.props" Condition="Exists('..\..\config.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8B2D4F66-3CAE-4071-9F32-6E8DAB1C2F53}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>NGenBench</RootNamespace>
+    <AssemblyName>NGenBench</AssemblyName>
+    <SilverlightAppEntry>NGenBench.App</SilverlightAppEntry>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <!-- The Silverlight360 SDK (github.com/Digiex/Silverlight360): where config.props, a property or an
+         environment variable says, else a checkout beside this repository. -->
+    <Silverlight360Dir Condition=" '$(Silverlight360Dir)' == '' ">$(MSBuildThisFileDirectory)..\..\..\Silverlight360\</Silverlight360Dir>
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
+    <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
+    <Compile Include="Tests.cs" />
+    <Compile Include="LongTests.cs" />
+    <Compile Include="Timing.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Silverlight360Dir)samples\Common\DebugLog.cs"><Link>Common\DebugLog.cs</Link></Compile>
+  </ItemGroup>
+  <Import Project="$(Silverlight360Dir)msbuild\XboxSilverlight.targets" />
+</Project>
