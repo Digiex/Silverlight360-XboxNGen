@@ -112,7 +112,9 @@ The repository's folders split by who needs them:
 
 ## Making native images
 
-What you need:
+A [release](https://github.com/Digiex/Silverlight360-XboxNGen/releases)'s zip has the JIT, the host and the code cache
+module built, in their places beside the tools: with it, you need only xenia-edge and the package (its `BUILD.txt`
+says how). To build them yourself, what you need:
 
 - xenia-edge from the `silverlight-build` branch of [jessenic/xenia-edge](https://github.com/jessenic/xenia-edge/tree/silverlight-build),
   built. It is upstream [has207/xenia-edge](https://github.com/has207/xenia-edge) with the fixes this needs that
@@ -156,6 +158,7 @@ wsl -e bash -lc 'for d in jit host codecache; do make -C $d || exit 1; done'
 | `Run-Xenia.ps1` | Runs a staged package in xenia-edge, headless, until the title exits or a timeout, and prints its DbgPrint lines (`NGen-Package.ps1`'s zapper runs). |
 | `pe2nixex.py` | Rebases the zapper's PE (based at 0) to a load address (moving only words that point into the image: precodes hold xcoreclr's fixup thunk addresses under relocations too), sets `CORCOMPILE_HEADER.ImageBase`, wraps it in the XEX module xcoreclr loads. |
 | `argb2png.py` | Turns a screenshot an app dumps into a PNG, for `Run-App.ps1`. |
+| `Release.ps1` | Builds the three binaries from scratch, runs NGenBench on them (`test\Test-Mscorlib.ps1`), zips them with the tools and publishes the zip as a GitHub release, the next version after the last `v<version>` tag (`-Bump`, `-Version`; `-DryRun` publishes nothing). Not in the zip. |
 
 `NGen-Package.ps1` compiles the `AppManifest.xaml` assemblies that have no native image yet (or those given with
 `-Assemblies`), placing images from 0x95000000 up (`-BaseAddress`). It runs xenia-edge as a devkit
