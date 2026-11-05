@@ -4,7 +4,8 @@ Records where this machine keeps what XboxNGen's tools need, once, for every lat
 
 .DESCRIPTION
 Finds each location from its parameter, else its environment variable, else the place a checkout usually is (beside
-this repository), and asks for any it can't find unless -NonInteractive. Writes, at the repository's root (git ignores
+this repository), and asks for any it can't find unless -NonInteractive. With no xenia_edge.exe, it offers to download
+xenia-edge's silverlight-build release (README.md) beside this repository; -DownloadXenia does without asking. Writes, at the repository's root (git ignores
 them):
   config.json   the locations, for the PowerShell tools (tools\Config.ps1 reads it; an environment variable still wins)
   config.mk     XSDK, as WSL sees it, for make in jit\, host\ and codecache\
@@ -31,6 +32,8 @@ param(
     [string]$Apps = '',
     [string]$Silverlight360 = '',
     [string]$Xsdk = '',
+    # Downloads xenia-edge's release without asking when no xenia_edge.exe is found (as with -NonInteractive).
+    [switch]$DownloadXenia,
     [switch]$NonInteractive,
     [switch]$Show
 )
@@ -48,11 +51,42 @@ if ($Show) {
 
 $previous = if (Test-Path $jsonFile) { Get-Content $jsonFile -Raw | ConvertFrom-Json } else { $null }
 
+# The xenia-edge build README.md names: the silverlight-build branch's Windows release.
+$xeniaRepository = 'jessenic/xenia-edge'
+$xeniaTag = 'silverlight-build-20261105'
+$xeniaAsset = 'xenia_edge_windows.zip'
+# Where it goes: xenia-edge\ beside this repository, unless that holds something else (a checkout, say).
+$xeniaFolder = "$parent\xenia-edge"
+if (Get-ChildItem $xeniaFolder -Force -ErrorAction SilentlyContinue | Select-Object -First 1) { $xeniaFolder = "$parent\xenia-edge-$xeniaTag" }
+
+# Downloads the release, checks it against the SHA-256 GitHub gives for it, extracts it and gives its xenia_edge.exe.
+function Get-XeniaRelease {
+    $agent = 'XboxNGen-Configure'
+    $release = Invoke-RestMethod "https://api.github.com/repos/$xeniaRepository/releases/tags/$xeniaTag" -UserAgent $agent
+    $asset = $release.assets | Where-Object { $_.name -eq $xeniaAsset } | Select-Object -First 1
+    if (-not $asset) { throw "$xeniaTag has no $xeniaAsset" }
+    $download = Join-Path ([IO.Path]::GetTempPath()) "$xeniaTag-$xeniaAsset"
+    Write-Host "Downloading $($asset.browser_download_url)"
+    Invoke-WebRequest $asset.browser_download_url -OutFile $download -UserAgent $agent -UseBasicParsing
+    try {
+        $actual = (Get-FileHash $download -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($asset.digest -notmatch '^sha256:([0-9a-f]{64})$') { Write-Warning "GitHub gives no SHA-256 for $xeniaAsset; it is $actual" }
+        elseif ($actual -ne $Matches[1]) { throw "$xeniaAsset's SHA-256 is $actual, GitHub says $($Matches[1])" }
+        $null = New-Item -ItemType Directory $xeniaFolder -Force
+        Expand-Archive $download -DestinationPath $xeniaFolder -Force
+    } finally { Remove-Item $download -ErrorAction SilentlyContinue }
+    Get-ChildItem $xeniaFolder -Recurse -File | Unblock-File
+    $exe = Get-ChildItem $xeniaFolder -Filter xenia_edge.exe -Depth 1 | Select-Object -First 1
+    if (-not $exe) { throw "$xeniaAsset has no xenia_edge.exe" }
+    Write-Host "  $xeniaTag in $xeniaFolder"
+    $exe.FullName
+}
+
 # Each location: how to recognise it, where it usually is, and what to ask.
 $items = [ordered]@{
     Xenia = @{ Variable = 'XENIA_EDGE'; Test = { param($p) Test-Path $p -PathType Leaf }
         # The silverlight-build release extracted beside this repository (README.md), else a build of its branch.
-        Guesses = @(@(Get-ChildItem "$parent\xenia-edge" -Filter xenia_edge.exe -Depth 1 -ErrorAction SilentlyContinue |
+        Guesses = @(@(Get-ChildItem "$parent\xenia-edge", "$parent\xenia-edge-$xeniaTag" -Filter xenia_edge.exe -Depth 1 -ErrorAction SilentlyContinue |
                 ForEach-Object FullName) +
             "$parent\xenia-edge\build\bin\Windows\Release\xenia_edge.exe", "$parent\..\xenia-edge\build\bin\Windows\Release\xenia_edge.exe")
         Ask = 'xenia_edge.exe' }
@@ -75,6 +109,10 @@ foreach ($name in $items.Keys) {
     if ($previous) { $candidates += $previous.$name }
     $candidates += $item.Guesses
     $found = $candidates | Where-Object { $_ -and (& $item.Test $_) } | Select-Object -First 1
+    if (-not $found -and $name -eq 'Xenia' -and ($DownloadXenia -or (-not $NonInteractive -and
+            (Read-Host "No xenia_edge.exe found. Download xenia-edge's $xeniaTag release to $xeniaFolder? (Y/n)") -notmatch '^n'))) {
+        try { $found = Get-XeniaRelease } catch { Write-Warning "Couldn't get xenia-edge's release: $_" }
+    }
     while (-not $found -and -not $NonInteractive -and -not $item.Optional) {
         $answer = Read-Host "Where is $($item.Ask)? (empty to leave it unset)"
         if (-not $answer) { break }

@@ -118,7 +118,8 @@ says how). What you need:
 
 - xenia-edge with the fixes this needs: by default the Windows build
   [silverlight-build-20261105](https://github.com/jessenic/xenia-edge/releases/tag/silverlight-build-20261105)
-  (`xenia_edge_windows.zip`), extracted to `xenia-edge\` beside this repository, where `Configure.ps1` looks. It is
+  (`xenia_edge_windows.zip`), extracted to `xenia-edge\` beside this repository, where `Configure.ps1` looks; it offers
+  to download and extract it when it finds no `xenia_edge.exe`. It is
   the `silverlight-build` branch of [jessenic/xenia-edge](https://github.com/jessenic/xenia-edge/tree/silverlight-build):
   upstream [has207/xenia-edge](https://github.com/has207/xenia-edge) with the fixes this needs that aren't merged there
   yet (devkit code buffers, code patched in place, fault delivery, sockets), `--unattended` and `--headless`, and
@@ -137,12 +138,10 @@ git clone https://github.com/Digiex/Silverlight360-XboxNGen
 # Beside it, where Configure.ps1 looks: xsdk with its DLL support (xenosworks/xsdk#4, until it is merged). Build its
 # toolchain and libxsdk.a as its own docs say.
 git clone -b dll-modules https://github.com/jessenic/xsdk
-# And xenia-edge with the fixes it needs, built.
-Invoke-WebRequest https://github.com/jessenic/xenia-edge/releases/download/silverlight-build-20261105/xenia_edge_windows.zip -OutFile xenia_edge_windows.zip
-Expand-Archive xenia_edge_windows.zip xenia-edge
 cd Silverlight360-XboxNGen
 
-# Once: record where xenia-edge and xsdk are, then build the JIT, the host and the code cache module in WSL.
+# Once: record where xenia-edge and xsdk are (Configure.ps1 offers to download xenia-edge's release beside this
+# repository), then build the JIT, the host and the code cache module in WSL.
 .\tools\Configure.ps1
 wsl -e bash -lc 'for d in jit host codecache; do make -C $d || exit 1; done'
 
@@ -185,7 +184,10 @@ The images are unsigned: they run in xenia-edge and on a console that runs unsig
 
 `.\tools\Configure.ps1` finds each location (from its parameter, the environment, else beside this repository), asks
 for xenia-edge, xsdk and the SDK if it can't find them, and records them for every later run in `config.json`,
-`config.mk` and `config.props` at the repository's root (not committed). `-Show` prints the result; run it again with a
+`config.mk` and `config.props` at the repository's root (not committed). With no `xenia_edge.exe`, it first offers to
+download xenia-edge's release (above) to `xenia-edge\` beside this repository, or `xenia-edge-<tag>\` when that folder
+holds something else, after checking it against the SHA-256 GitHub gives; `-DownloadXenia` downloads it without asking,
+also with `-NonInteractive`. `-Show` prints the result; run it again with a
 parameter (`-Xenia`, `-Xsdk`, `-Work`, `-Silverlight360`, `-Apps`) to change one. An environment variable overrides the
 recorded value:
 

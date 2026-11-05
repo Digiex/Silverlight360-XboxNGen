@@ -115,11 +115,9 @@ $(if ($tested) { "NGenBench on the JIT's images of mscorlib and the platform: $t
 
 jit\xclrjit.dll, host\ngenhost.xex and codecache\CLRCodeCachedll_0.xex are built, so making native images needs
 only xenia-edge (README.md, "Making native images"), not xsdk:
-1. Extract xenia_edge_windows.zip from
-   https://github.com/jessenic/xenia-edge/releases/tag/silverlight-build-20261105
-   to xenia-edge\ beside this folder.
-2. .\tools\Configure.ps1, leaving xsdk unset.
-3. .\tools\NGen-Package.ps1 -Package <package folder>
+1. .\tools\Configure.ps1, leaving xsdk unset. Without xenia-edge, it offers to download its build
+   https://github.com/jessenic/xenia-edge/releases/tag/silverlight-build-20261105 beside this folder.
+2. .\tools\NGen-Package.ps1 -Package <package folder>
 The images it makes are unsigned: they run in xenia-edge and on a console that runs unsigned code.
 "@
 Write-Utf8 (Join-Path $staging 'BUILD.txt') ($build -split "`r?`n")
