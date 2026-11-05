@@ -12,7 +12,7 @@ them):
 Run it again to change a location; -Show prints what is configured.
 
 Making native images (tools\) needs:
-  Xenia           xenia_edge.exe (xenia-edge's build)
+  Xenia           xenia_edge.exe (xenia-edge's silverlight-build release, or a build of that branch)
   Xsdk            an xsdk checkout with libxsdk.a built, which the JIT, the host and the code cache link
   Work            the work folder: our images, staged packages, timings (default: work\ in this repository)
 Testing the JIT (test\) also needs:
@@ -51,7 +51,10 @@ $previous = if (Test-Path $jsonFile) { Get-Content $jsonFile -Raw | ConvertFrom-
 # Each location: how to recognise it, where it usually is, and what to ask.
 $items = [ordered]@{
     Xenia = @{ Variable = 'XENIA_EDGE'; Test = { param($p) Test-Path $p -PathType Leaf }
-        Guesses = @("$parent\xenia-edge\build\bin\Windows\Release\xenia_edge.exe", "$parent\..\xenia-edge\build\bin\Windows\Release\xenia_edge.exe")
+        # The silverlight-build release extracted beside this repository (README.md), else a build of its branch.
+        Guesses = @(@(Get-ChildItem "$parent\xenia-edge" -Filter xenia_edge.exe -Depth 1 -ErrorAction SilentlyContinue |
+                ForEach-Object FullName) +
+            "$parent\xenia-edge\build\bin\Windows\Release\xenia_edge.exe", "$parent\..\xenia-edge\build\bin\Windows\Release\xenia_edge.exe")
         Ask = 'xenia_edge.exe' }
     Work = @{ Variable = 'XBOXNGEN_WORK'; Test = { param($p) $true }; Guesses = @("$root\work"); Optional = $true }
     Apps = @{ Variable = 'XBOXNGEN_APPS'; Test = { param($p) Test-Path (Join-Path $p 'Vimeo\mscorlib.dll') }

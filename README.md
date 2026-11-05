@@ -114,16 +114,19 @@ The repository's folders split by who needs them:
 
 A [release](https://github.com/Digiex/Silverlight360-XboxNGen/releases)'s zip has the JIT, the host and the code cache
 module built, in their places beside the tools: with it, you need only xenia-edge and the package (its `BUILD.txt`
-says how). To build them yourself, what you need:
+says how). What you need:
 
-- xenia-edge from the `silverlight-build` branch of [jessenic/xenia-edge](https://github.com/jessenic/xenia-edge/tree/silverlight-build),
-  built. It is upstream [has207/xenia-edge](https://github.com/has207/xenia-edge) with the fixes this needs that
-  aren't merged there yet (devkit code buffers, code patched in place, fault delivery, sockets), `--unattended` and
-  `--headless`, and guest stack logging;
-- [xsdk](https://github.com/xenosworks/xsdk) with its toolchain in WSL (`~/xsdk-gcc`) and `libxsdk.a` built, to build
-  the JIT, the host and the code cache module. They need its DLL support (`tools/elf2xex.py --dll --export-name`),
-  which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4) until it is merged: check out that
-  pull request's branch, `dll-modules` of [jessenic/xsdk](https://github.com/jessenic/xsdk);
+- xenia-edge with the fixes this needs: by default the Windows build
+  [silverlight-build-20261105](https://github.com/jessenic/xenia-edge/releases/tag/silverlight-build-20261105)
+  (`xenia_edge_windows.zip`), extracted to `xenia-edge\` beside this repository, where `Configure.ps1` looks. It is
+  the `silverlight-build` branch of [jessenic/xenia-edge](https://github.com/jessenic/xenia-edge/tree/silverlight-build):
+  upstream [has207/xenia-edge](https://github.com/has207/xenia-edge) with the fixes this needs that aren't merged there
+  yet (devkit code buffers, code patched in place, fault delivery, sockets), `--unattended` and `--headless`, and
+  guest stack logging. To change xenia-edge, build that branch yourself instead;
+- unless you use a release's zip, [xsdk](https://github.com/xenosworks/xsdk) with its toolchain in WSL (`~/xsdk-gcc`)
+  and `libxsdk.a` built, to build the JIT, the host and the code cache module. They need its DLL support
+  (`tools/elf2xex.py --dll --export-name`), which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4)
+  until it is merged: check out that pull request's branch, `dll-modules` of [jessenic/xsdk](https://github.com/jessenic/xsdk);
 - Python 3 (the standard library only);
 - the package to compile: a Silverlight360 / Xbox 360 Silverlight app, as the
   [Silverlight360 SDK](https://github.com/Digiex/Silverlight360) builds it (its `default.xex`, `AppManifest.xaml`, the
@@ -134,8 +137,9 @@ git clone https://github.com/Digiex/Silverlight360-XboxNGen
 # Beside it, where Configure.ps1 looks: xsdk with its DLL support (xenosworks/xsdk#4, until it is merged). Build its
 # toolchain and libxsdk.a as its own docs say.
 git clone -b dll-modules https://github.com/jessenic/xsdk
-# And xenia-edge with the fixes it needs; build it as its own docs say.
-git clone -b silverlight-build https://github.com/jessenic/xenia-edge
+# And xenia-edge with the fixes it needs, built.
+Invoke-WebRequest https://github.com/jessenic/xenia-edge/releases/download/silverlight-build-20261105/xenia_edge_windows.zip -OutFile xenia_edge_windows.zip
+Expand-Archive xenia_edge_windows.zip xenia-edge
 cd Silverlight360-XboxNGen
 
 # Once: record where xenia-edge and xsdk are, then build the JIT, the host and the code cache module in WSL.
