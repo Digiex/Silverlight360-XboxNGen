@@ -1404,7 +1404,7 @@ static bool call_method(Ctx *c, CORINFO_METHOD_HANDLE method, bool inst_supplied
 
 // ZapInfo::getHelperFtn (0x84E2F578) answers a helper thunk node for the image, which embeds the runtime's
 // address of the helper (the thunk's lis/addi carry a base relocation like every absolute word of the image, which
-// is why pe2nixex.py moves only words that point into the image). With the high bit set on the helper number it
+// is why pe2nixex.ps1 moves only words that point into the image). With the high bit set on the helper number it
 // would give an import cell instead; Microsoft's code calls the thunks.
 static bool call_helper_at(Ctx *c, uint32_t helper, bool safe)
 {

@@ -16,7 +16,7 @@ the list of what remains, with a prompt at the end for an agent continuing it.
   of the whole platform and of themselves (`test\Run-OnOurs.ps1`, which stops on each sample's "<name>: ready"
   line). Each sample saves a screenshot of its own drawing just before that line (the SDK's
   `samples\Common\Screenshot.cs`: the root visual drawn into a `WriteableBitmap`, written to `game:\screenshot.argb`),
-  which `Run-App.ps1` turns into the run's PNG (`tools\argb2png.py`; xenia runs with
+  which `Run-App.ps1` turns into the run's PNG (`tools\argb2png.ps1`; xenia runs with
   `--allow_game_relative_writes`). A capture of xenia's window (PrintWindow), the fallback for apps that save none,
   often gives xenia's stale splash frame instead. `test\Compare-Run.ps1` runs a shipped package on Microsoft's
   images and on ours and compares how far each got: Plex reaches its "Please sign in" screen on both. Seven more

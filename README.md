@@ -128,7 +128,6 @@ says how). What you need:
   and `libxsdk.a` built, to build the JIT, the host and the code cache module. They need its DLL support
   (`tools/elf2xex.py --dll --export-name`), which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4)
   until it is merged: check out that pull request's branch, `dll-modules` of [jessenic/xsdk](https://github.com/jessenic/xsdk);
-- Python 3 (the standard library only);
 - the package to compile: a Silverlight360 / Xbox 360 Silverlight app, as the
   [Silverlight360 SDK](https://github.com/Digiex/Silverlight360) builds it (its `default.xex`, `AppManifest.xaml`, the
   runtime and the assemblies).
@@ -159,8 +158,8 @@ wsl -e bash -lc 'for d in jit host codecache; do make -C $d || exit 1; done'
 | `NGen-Platform.ps1` | Compiles a package's platform assemblies against its mscorlib.ni.dll, one NGen-Package run each, at following load addresses. |
 | `Run-App.ps1` | Runs a package in xenia-edge until a DbgPrint line matches, it hangs, or exits; restarts on the emulator's startup scheduler stall. |
 | `Run-Xenia.ps1` | Runs a staged package in xenia-edge, headless, until the title exits or a timeout, and prints its DbgPrint lines (`NGen-Package.ps1`'s zapper runs). |
-| `pe2nixex.py` | Rebases the zapper's PE (based at 0) to a load address (moving only words that point into the image: precodes hold xcoreclr's fixup thunk addresses under relocations too), sets `CORCOMPILE_HEADER.ImageBase`, wraps it in the XEX module xcoreclr loads. |
-| `argb2png.py` | Turns a screenshot an app dumps into a PNG, for `Run-App.ps1`. |
+| `pe2nixex.ps1` | Rebases the zapper's PE (based at 0) to a load address (moving only words that point into the image: precodes hold xcoreclr's fixup thunk addresses under relocations too), sets `CORCOMPILE_HEADER.ImageBase`, wraps it in the XEX module xcoreclr loads. |
+| `argb2png.ps1` | Turns a screenshot an app dumps into a PNG, for `Run-App.ps1`. |
 | `Release.ps1` | Builds the three binaries from scratch, runs NGenBench on them (`test\Test-Mscorlib.ps1`), zips them with the tools and publishes the zip as a GitHub release, the next version after the last `v<version>` tag (`-Bump`, `-Version`; `-DryRun` publishes nothing). Not in the zip. |
 
 `NGen-Package.ps1` compiles the `AppManifest.xaml` assemblies that have no native image yet (or those given with

@@ -36,6 +36,6 @@ The PC-only option would mean recreating most of a CLR build from disassembly, w
 
 - **`xclrjit.dll`** (our JIT, a PPC XEX DLL built with xsdk's GCC) exports `sxsJitStartup` and `getJit` by name (XEX header `0x00E10402`, a PE export directory, as `agcore.dll` and `npctrl.dll` carry).
 - **`ngenhost.xex`** (a small xsdk title) loads `xcoreclr.dll` and calls its zapper entry point for each assembly.
-- **The PC driver** stages the app's assemblies, the runtime and our two modules in a folder, runs xenia-edge on it, collects the PE files the zapper writes and wraps them with `pe2nixex.py` into `.ni.dll` XEX modules at free load addresses.
+- **The PC driver** stages the app's assemblies, the runtime and our two modules in a folder, runs xenia-edge on it, collects the PE files the zapper writes and wraps them with `pe2nixex.ps1` into `.ni.dll` XEX modules at free load addresses.
 - **Partial images are fine.** A method the JIT declines stays IL; the runtime interprets it, as it does for every app method today.
 - **Unsigned.** The XEX modules are not RSA-signed. xenia-edge doesn't check; a retail console without patched hypervisor would reject them.

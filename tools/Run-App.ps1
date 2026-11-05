@@ -9,7 +9,7 @@ xenia runs --unattended: its window shows, its dialogs (the host's "Error: 4004"
 dismissed with their default button, and it exits when the app does (code 0) or crashes (code 1). The screenshot
 (-Screenshot) is the app's own when it saved one (the SDK's samples\Common\Screenshot.cs logs "screenshot
 game:\<name>.argb <w>x<h>"; xenia runs with --allow_game_relative_writes so the app's folder is writable), made a PNG
-by argb2png.py; otherwise, before stopping a xenia still running, a capture of its window, which PrintWindow
+by argb2png.ps1; otherwise, before stopping a xenia still running, a capture of its window, which PrintWindow
 sometimes gives as xenia's stale splash frame. Prints the app's DbgPrint lines, the
 dialogs it showed and, if xenia crashed, its exit code, the Windows Error Reporting record since the start (exception
 code and offset in xenia_edge.exe) and the end of the log.
@@ -109,8 +109,13 @@ $own = if ($Screenshot -and (Test-Path $Log)) {
 }
 if ($own) {
     $file = Join-Path (Split-Path $Xex -Parent) $own.Matches[0].Groups[1].Value
-    & python (Join-Path $PSScriptRoot 'argb2png.py') $file $own.Matches[0].Groups[2].Value $own.Matches[0].Groups[3].Value $Screenshot
-    if ($LASTEXITCODE -eq 0) { Write-Host "screenshot: $Screenshot (the app's own)" } else { $own = $null }
+    try {
+        & (Join-Path $PSScriptRoot 'argb2png.ps1') $file $own.Matches[0].Groups[2].Value $own.Matches[0].Groups[3].Value $Screenshot
+        Write-Host "screenshot: $Screenshot (the app's own)"
+    } catch {
+        Write-Warning "the app's screenshot: $_"
+        $own = $null
+    }
 }
 if (-not $process.HasExited) {
     if ($Screenshot -and -not $own) {

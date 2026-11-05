@@ -7,7 +7,7 @@ Makes native images (.ni.dll) for a Silverlight360 / Xbox 360 Silverlight packag
    (host\ngenhost.xex) its default.xex, with ngen.txt listing the assemblies to compile.
 2. Runs the staging folder in xenia-edge. The host calls xcoreclr's NGenWorker for each assembly; the zapper loads
    xclrjit.dll and writes <name>.ni.dll (a PE based at 0) beside the assembly.
-3. Rebases each PE to a free load address and wraps it in the XEX module xcoreclr loads (tools\pe2nixex.py), with
+3. Rebases each PE to a free load address and wraps it in the XEX module xcoreclr loads (tools\pe2nixex.ps1), with
    the package's title, then copies it into the package.
 
 The images are not signed: they load in xenia-edge, not on a retail console.
@@ -73,8 +73,7 @@ foreach ($name in $Assemblies) {
     if (-not (Test-Path $pe)) { $pe = Join-Path $Stage "$(Image-Name $name).ni.dll" }
     if (-not (Test-Path $pe)) { Write-Warning "${name}: the zapper wrote no native image"; continue }
     $out = Join-Path $Package "$(Image-Name $name).ni.dll"
-    & python -I (Join-Path $PSScriptRoot 'pe2nixex.py') $pe $out --template $template --base ('{0:X8}' -f $base) --name "$name.ni.dll"
-    if ($LASTEXITCODE) { throw "pe2nixex failed for $name" }
+    & (Join-Path $PSScriptRoot 'pe2nixex.ps1') $pe $out -Template $template -Base ('{0:X8}' -f $base) -Name "$name.ni.dll"
     Write-Host ('{0}.ni.dll at {1:X8}' -f (Image-Name $name), $base)
     # The next image starts on the next 64 KB boundary after this one's PE image size.
     $bytes = [IO.File]::ReadAllBytes($pe)
