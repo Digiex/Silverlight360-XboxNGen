@@ -5,6 +5,7 @@ XSDK ?= $(error set XSDK to an xsdk checkout with libxsdk.a built: run tools\Con
 TOOLCHAIN ?= $(HOME)/xsdk-gcc/bin/powerpc-xsdk-elf-
 CC := $(TOOLCHAIN)gcc
 BUILD := build
+# The image's base: the link defines xsdk_dll_base as it, which codecache.ld lays the image out from and elf2xex reads.
 BASE := 8D000000
 
 CFLAGS := -mcpu=cell -fno-pic -O2 -std=gnu17 -Wall -Wextra -Werror -ffreestanding -fno-builtin -I$(XSDK)/include
@@ -12,11 +13,11 @@ CFLAGS := -mcpu=cell -fno-pic -O2 -std=gnu17 -Wall -Wextra -Werror -ffreestandin
 all: CLRCodeCachedll_0.xex
 
 CLRCodeCachedll_0.xex: $(BUILD)/codecache.elf $(XSDK)/tools/elf2xex.py
-	python3 $(XSDK)/tools/elf2xex.py --dll --base $(BASE) --export-name LINKHACKFUNCTIONPROC0 \
+	python3 $(XSDK)/tools/elf2xex.py --title-dll --export-name LINKHACKFUNCTIONPROC0 \
 		--export-name LINKHACKFUNCTIONPROCLAST $< $@
 
 $(BUILD)/codecache.elf: $(BUILD)/codecache.o codecache.ld
-	$(CC) -static -nostdlib -T codecache.ld -o $@ $<
+	$(CC) -static -nostdlib -T codecache.ld -Wl,--defsym=xsdk_dll_base=0x$(BASE) -o $@ $<
 
 $(BUILD)/%.o: %.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@

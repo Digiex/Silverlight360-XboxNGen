@@ -1,4 +1,4 @@
-/* Lays xclrjit.dll out for xsdk's tools/elf2xex.py --dll, as xsdk's src/xsdk.ld lays out a title: read-only data,
+/* Lays xclrjit.dll out for xsdk's tools/elf2xex.py --title-dll, as xsdk's src/xsdk.ld lays out a title: read-only data,
    code and writable data each on their own 64 KB pages. Based on UnRar360's unrar360.ld. */
 OUTPUT_FORMAT("elf32-powerpc")
 OUTPUT_ARCH(powerpc:common)
@@ -7,9 +7,9 @@ ENTRY(xclrjit_entry)
 SECTIONS
 {
 	/* Clear of the title (0x82000000), the Silverlight runtime's modules, the last of which ends at 0x8B860000, and
-	   the native images from 0x941C0000 (the Plex 0.0.0.7 runtime's XEX headers). The Makefile's --base says the
-	   same. */
-	. = 0x8C800000 + 0x1000;
+	   the native images from 0x941C0000 (the Plex 0.0.0.7 runtime's XEX headers): 0x8C800000, which the Makefile's
+	   BASE gives the link as xsdk_dll_base; elf2xex reads the base from that symbol. */
+	. = xsdk_dll_base + 0x1000;
 	.rdata : {
 		*(.rodata .rodata.* .gnu.linkonce.r.*)
 		*(.sdata2 .sdata2.* .sbss2 .sbss2.*)

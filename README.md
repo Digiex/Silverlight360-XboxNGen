@@ -126,7 +126,7 @@ says how). What you need:
   guest stack logging. To change xenia-edge, build that branch yourself instead;
 - unless you use a release's zip, [xsdk](https://github.com/xenosworks/xsdk) with its toolchain in WSL (`~/xsdk-gcc`)
   and `libxsdk.a` built, to build the JIT, the host and the code cache module. They need its DLL support
-  (`tools/elf2xex.py --dll --export-name`), which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4)
+  (`tools/elf2xex.py --title-dll --export-name`), which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4)
   until it is merged: check out that pull request's branch, `dll-modules` of [jessenic/xsdk](https://github.com/jessenic/xsdk);
 - the package to compile: a Silverlight360 / Xbox 360 Silverlight app, as the
   [Silverlight360 SDK](https://github.com/Digiex/Silverlight360) builds it (its `default.xex`, `AppManifest.xaml`, the

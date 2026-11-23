@@ -1,13 +1,13 @@
-/* Lays CLRCodeCachedll_0.xex out for xsdk's tools/elf2xex.py --dll: code and data on their own 64 KB pages. */
+/* Lays CLRCodeCachedll_0.xex out for xsdk's tools/elf2xex.py --title-dll: code and data on their own 64 KB pages. */
 OUTPUT_FORMAT("elf32-powerpc")
 OUTPUT_ARCH(powerpc:common)
 ENTRY(codecache_entry)
 
 SECTIONS
 {
-	/* Above xclrjit.dll (0x8C800000, under 1 MB) and below the native images from 0x941C0000. The Makefile's --base
-	   says the same. */
-	. = 0x8D000000 + 0x1000;
+	/* Above xclrjit.dll (0x8C800000, under 1 MB) and below the native images from 0x941C0000: 0x8D000000, which
+	   the Makefile's BASE gives the link as xsdk_dll_base; elf2xex reads the base from that symbol. */
+	. = xsdk_dll_base + 0x1000;
 	.rdata : {
 		*(.rodata .rodata.* .gnu.linkonce.r.*)
 	}

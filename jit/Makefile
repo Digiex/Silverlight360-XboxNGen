@@ -6,6 +6,7 @@ XSDK ?= $(error set XSDK to an xsdk checkout with libxsdk.a built: run tools\Con
 TOOLCHAIN ?= $(HOME)/xsdk-gcc/bin/powerpc-xsdk-elf-
 CC := $(TOOLCHAIN)gcc
 BUILD := build
+# The image's base: the link defines xsdk_dll_base as it, which xclrjit.ld lays the image out from and elf2xex reads.
 BASE := 8C800000
 
 SOURCES := xclrjit.c compiler.c
@@ -23,10 +24,10 @@ LIBS := -Wl,--start-group $(XSDK)/build/libxsdk.a -lc -lgcc -Wl,--end-group
 all: xclrjit.dll
 
 xclrjit.dll: $(BUILD)/xclrjit.elf $(XSDK)/tools/elf2xex.py
-	python3 $(XSDK)/tools/elf2xex.py --dll --base $(BASE) --export-name sxsJitStartup --export-name getJit $< $@
+	python3 $(XSDK)/tools/elf2xex.py --title-dll --export-name sxsJitStartup --export-name getJit $< $@
 
 $(BUILD)/xclrjit.elf: $(OBJECTS) xclrjit.ld
-	$(CC) -static -nostdlib -T xclrjit.ld -Wl,-Map,$(BUILD)/xclrjit.map -o $@ $(OBJECTS) $(LIBS)
+	$(CC) -static -nostdlib -T xclrjit.ld -Wl,--defsym=xsdk_dll_base=0x$(BASE) -Wl,-Map,$(BUILD)/xclrjit.map -o $@ $(OBJECTS) $(LIBS)
 
 $(BUILD)/%.o: %.c jitee.h compiler.h gcinfo.h ppc.h | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@

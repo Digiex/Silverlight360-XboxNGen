@@ -178,10 +178,13 @@ $mk = "# Written by tools\Configure.ps1.`n"
 if ($config.Xsdk) {
     $drive = $config.Xsdk.Substring(0, 1).ToLowerInvariant()
     $mk += "XSDK ?= /mnt/$drive$($config.Xsdk.Substring(2) -replace '\\', '/')`n"
-    # The JIT and the code cache module export by name, which xsdk's elf2xex has from its pull request 4 on.
+    # The JIT and the code cache module are a title's DLLs that export by name: xsdk's elf2xex --title-dll with
+    # --export-name, from its pull request 4 on (its earlier commits had --dll --base instead, which these Makefiles
+    # no longer pass).
     $elf2xex = Join-Path $config.Xsdk 'tools\elf2xex.py'
-    if (-not ((Test-Path $elf2xex) -and (Select-String -Path $elf2xex -Pattern 'export-name' -SimpleMatch -Quiet))) {
-        Write-Warning ("this xsdk's tools\elf2xex.py has no --export-name, which the JIT's build needs: use xsdk with " +
+    if (-not ((Test-Path $elf2xex) -and (Select-String -Path $elf2xex -Pattern '--title-dll' -SimpleMatch -Quiet) -and
+            (Select-String -Path $elf2xex -Pattern '--export-name' -SimpleMatch -Quiet))) {
+        Write-Warning ("this xsdk's tools\elf2xex.py has no --title-dll --export-name, which the JIT's build needs: use xsdk with " +
             "https://github.com/xenosworks/xsdk/pull/4 (branch dll-modules of https://github.com/jessenic/xsdk)")
     }
 }
