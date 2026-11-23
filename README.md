@@ -116,14 +116,15 @@ A [release](https://github.com/Digiex/Silverlight360-XboxNGen/releases)'s zip ha
 module built, in their places beside the tools: with it, you need only xenia-edge and the package (its `BUILD.txt`
 says how). What you need:
 
-- xenia-edge with the fixes this needs: by default the Windows build
-  [silverlight-build-20261105](https://github.com/jessenic/xenia-edge/releases/tag/silverlight-build-20261105)
+- [xenia-edge](https://github.com/has207/xenia-edge), from its commit 1198c6b on: it has everything this needs (devkit
+  code buffers, code patched in place, fault delivery, sockets, `--unattended` and `--disable_ui`). By default the
+  Windows build of that commit, [1198c6b](https://github.com/has207/xenia-edge/releases/tag/1198c6b)
   (`xenia_edge_windows.zip`), extracted to `xenia-edge\` beside this repository, where `Configure.ps1` looks; it offers
-  to download and extract it when it finds no `xenia_edge.exe`. It is
-  the `silverlight-build` branch of [jessenic/xenia-edge](https://github.com/jessenic/xenia-edge/tree/silverlight-build):
-  upstream [has207/xenia-edge](https://github.com/has207/xenia-edge) with the fixes this needs that aren't merged there
-  yet (devkit code buffers, code patched in place, fault delivery, sockets), `--unattended` and `--headless`, and
-  guest stack logging. To change xenia-edge, build that branch yourself instead;
+  to download and extract it when it finds no `xenia_edge.exe`. `Configure.ps1` also puts the Direct3D 12 runtime
+  files that build loads (`D3D12\dxil.dll` and `D3D12\D3D12Core.dll`, from Microsoft, at the versions it pins) beside
+  it: xenia-edge would offer to download them, and the tools' unattended runs answer no. A newer build or your own
+  build of xenia-edge works too. Builds of the `silverlight-build` branch of jessenic/xenia-edge, which XboxNGen used
+  before these were merged, have `--headless` instead of `--disable_ui` and don't run with these tools;
 - unless you use a release's zip, [xsdk](https://github.com/xenosworks/xsdk) with its toolchain in WSL (`~/xsdk-gcc`)
   and `libxsdk.a` built, to build the JIT, the host and the code cache module. They need its DLL support
   (`tools/elf2xex.py --title-dll --export-name`), which is in [xenosworks/xsdk#4](https://github.com/xenosworks/xsdk/pull/4)
