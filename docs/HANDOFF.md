@@ -130,7 +130,8 @@ has no title id).
   dimensions; 403 is the virtual-function-pointer helper used for interface and generic virtual calls alike.
 - The retail mscorlib's resources are a stub: bracketed exception messages are normal on Microsoft's images too.
 - Diagnosing a misbehaving method on our images: trace first executions with
-  `--trace_define_start=<decimal> --trace_define_end=<decimal>` (Run-App.ps1 `-ExtraArgs`), name them with
+  `--trace_define_start=<decimal> --trace_define_end=<decimal>` (Run-App.ps1 `-ExtraArgs`; a debugging aid only in the
+  `pr-guest-stack-logging` branch of jessenic/xenia-edge, not upstream), name them with
   `research\trace_names.py`, disassemble the suspect with `research\nishow.py`, read its IL with `research\ildump.py`; the
   JIT built with `-DXNGEN_DUMP_STUBS` logs IL stubs' IL, fixups and relocations.
 - `Compare-Package.ps1` reuses images already in `<Work>\ours`: delete them (and `summary.txt`) to recompile.

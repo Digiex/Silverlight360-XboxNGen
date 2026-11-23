@@ -68,7 +68,8 @@ int main(void)
 	xsdk_log_write("ngenhost: start");
 
 	HANDLE clr = 0;
-	NTSTATUS status = XexLoadImage("game:\\xcoreclr.dll", XEX_LOAD_IMAGE_DLL, 0, &clr);
+	// A DLL of the title's process: the console's loader refuses a load into the system process from a title thread.
+	NTSTATUS status = XexLoadImage("game:\\xcoreclr.dll", XEX_LOAD_IMAGE_DLL | XEX_LOAD_IMAGE_TITLE, 0, &clr);
 	if (!NT_SUCCESS(status)) {
 		xsdk_log_write("ngenhost: XexLoadImage(xcoreclr.dll) failed: 0x%08X", (unsigned)status);
 		return 1;

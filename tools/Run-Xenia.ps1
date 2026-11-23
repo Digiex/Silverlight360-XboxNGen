@@ -4,8 +4,9 @@ Runs a staged package's default.xex in xenia-edge until the title exits or a tim
 
 .DESCRIPTION
 The package folder is mounted writable (--allow_game_relative_writes), which the zapper needs to write native
-images beside the assemblies it compiles. xenia runs --headless: no window, dialogs are logged and dismissed, and the
-process exits when the title does (code 0) or crashes (code 1). Its stdout copy of the log is discarded; -Log has it.
+images beside the assemblies it compiles. xenia runs --unattended --disable_ui: no window, dialogs are logged and
+dismissed, and the process exits when the title does (code 0) or crashes (code 1). Its stdout copy of the
+log is discarded; -Log has it.
 #>
 param(
     [Parameter(Mandatory)] [string]$Stage,
@@ -19,7 +20,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if (Test-Path $Log) { Remove-Item $Log -Force }
 $xex = Join-Path (Resolve-Path $Stage) 'default.xex'
-$arguments = @('--headless=true', "--log_file=`"$Log`"", '--log_level=2', '--flush_log=true', '--allow_game_relative_writes=true') + $ExtraArgs + @("`"$xex`"")
+$arguments = @('--unattended=true', '--disable_ui=true', "--log_file=`"$Log`"", '--log_level=2', '--flush_log=true', '--allow_game_relative_writes=true') + $ExtraArgs + @("`"$xex`"")
 $process = Start-Process -FilePath $Xenia -ArgumentList $arguments -RedirectStandardOutput 'NUL' -PassThru
 # Opening the handle now keeps ExitCode readable once the process is gone.
 $null = $process.Handle

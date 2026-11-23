@@ -833,7 +833,8 @@ gen\cmp\Vimeo2`): of the 69,168 method bodies in
   with TOKENKIND_NEWOBJ gave the method's lookup twice and hung the mscorlib compile), the method through
   embedGenericHandle with TOKENKIND_METHOD. NGenBench's GenericIface check calls IBox<T>.Get from
   Caller<T> shared over string and object.
-- **First-execution trace.** xenia-edge's `--trace_define_start=<dec>` / `--trace_define_end=<dec>` log
+- **First-execution trace.** A xenia-edge build with the `pr-guest-stack-logging` branch of jessenic/xenia-edge (not
+  upstream): its `--trace_define_start=<dec>` / `--trace_define_end=<dec>` log
   `Defined guest function X` whenever a function in that range is translated, i.e. first called (the thunks
   of .bisland show up too); with the image's function table that is a trace of which methods ran, in order,
   something a native-image run otherwise never tells (Run-App.ps1 -ExtraArgs, from PowerShell so the array

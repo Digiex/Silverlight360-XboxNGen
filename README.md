@@ -157,7 +157,7 @@ wsl -e bash -lc 'for d in jit host codecache; do make -C $d || exit 1; done'
 | `NGen-Package.ps1` | Stages a package with the JIT and the host, runs it in xenia-edge, then rebases and wraps each output. |
 | `NGen-Platform.ps1` | Compiles a package's platform assemblies against its mscorlib.ni.dll, one NGen-Package run each, at following load addresses. |
 | `Run-App.ps1` | Runs a package in xenia-edge until a DbgPrint line matches, it hangs, or exits; restarts on the emulator's startup scheduler stall. |
-| `Run-Xenia.ps1` | Runs a staged package in xenia-edge, headless, until the title exits or a timeout, and prints its DbgPrint lines (`NGen-Package.ps1`'s zapper runs). |
+| `Run-Xenia.ps1` | Runs a staged package in xenia-edge with no window (`--unattended --disable_ui`) until the title exits or a timeout, and prints its DbgPrint lines (`NGen-Package.ps1`'s zapper runs). |
 | `pe2nixex.ps1` | Rebases the zapper's PE (based at 0) to a load address (moving only words that point into the image: precodes hold xcoreclr's fixup thunk addresses under relocations too), sets `CORCOMPILE_HEADER.ImageBase`, wraps it in the XEX module xcoreclr loads. |
 | `argb2png.ps1` | Turns a screenshot an app dumps into a PNG, for `Run-App.ps1`. |
 | `Release.ps1` | Builds the three binaries from scratch, runs NGenBench on them (`test\Test-Mscorlib.ps1`), zips them with the tools and publishes the zip as a GitHub release, the next version after the last `v<version>` tag (`-Bump`, `-Version`; `-DryRun` publishes nothing). Not in the zip. |
@@ -246,7 +246,7 @@ The main ones:
 | `nicompare.py` | Compares one of our images with Microsoft's for the same assembly, method by method (`methodnames.py` names the methods); the Plex comparison is summarized in docs/RESEARCH.md. |
 | `nishow.py` | Disassembles one method of a native image with its GC and unwind info. |
 | `xex.py` | An XEX's memory image (`-b`: the PE as it lies in memory, for `nicompare.py` and `ppcdis.py`) and its headers (`-l`), for Microsoft's encrypted, LZX-compressed images too (`lzx.py`). |
-| `trace_names.py` | Names every function of a first-execution trace (`--trace_define_start/end`) across a package's images; `names_in_package.py` names single addresses. Diffing two apps' traces by method name found the declined method that kept HelloXbox from rendering. |
+| `trace_names.py` | Names every function of a first-execution trace (`--trace_define_start/end`, a xenia-edge debugging aid not upstream) across a package's images; `names_in_package.py` names single addresses. Diffing two apps' traces by method name found the declined method that kept HelloXbox from rendering. |
 | `ppcdis.py`, `x86dis.py` | Disassemble a range of a PowerPC memory image, or of an x86 PE with a symbol list. |
 | `ildump.py`, `gcinfo.py`, `pe.py` | IL of a method, a method's GC info, a PE's headers and sections. |
 

@@ -5,7 +5,9 @@ Records where this machine keeps what XboxNGen's tools need, once, for every lat
 .DESCRIPTION
 Finds each location from its parameter, else its environment variable, else the place a checkout usually is (beside
 this repository), and asks for any it can't find unless -NonInteractive. With no xenia_edge.exe, it offers to download
-xenia-edge's silverlight-build release (README.md) beside this repository; -DownloadXenia does without asking. Writes, at the repository's root (git ignores
+xenia-edge's Windows build (README.md) beside this repository; -DownloadXenia does without asking. It puts the
+Direct3D 12 runtime files that build loads in its D3D12 folder. An older xenia-edge without --disable_ui (a build of
+the silverlight-build branch of jessenic/xenia-edge) isn't used. Writes, at the repository's root (git ignores
 them):
   config.json   the locations, for the PowerShell tools (tools\Config.ps1 reads it; an environment variable still wins)
   config.mk     XSDK, as WSL sees it, for make in jit\, host\ and codecache\
@@ -13,7 +15,7 @@ them):
 Run it again to change a location; -Show prints what is configured.
 
 Making native images (tools\) needs:
-  Xenia           xenia_edge.exe (xenia-edge's silverlight-build release, or a build of that branch)
+  Xenia           xenia_edge.exe (xenia-edge's Windows build, or your own build of it)
   Xsdk            an xsdk checkout with libxsdk.a built, which the JIT, the host and the code cache link
   Work            the work folder: our images, staged packages, timings (default: work\ in this repository)
 Testing the JIT (test\) also needs:
@@ -51,10 +53,19 @@ if ($Show) {
 
 $previous = if (Test-Path $jsonFile) { Get-Content $jsonFile -Raw | ConvertFrom-Json } else { $null }
 
-# The xenia-edge build README.md names: the silverlight-build branch's Windows release.
-$xeniaRepository = 'jessenic/xenia-edge'
-$xeniaTag = 'silverlight-build-20261105'
+# The xenia-edge build README.md names: upstream's Windows build of that commit.
+$xeniaRepository = 'has207/xenia-edge'
+$xeniaTag = '1198c6b'
 $xeniaAsset = 'xenia_edge_windows.zip'
+# The Direct3D 12 runtime files that build loads from D3D12\ beside it, as its redist_installer_wx.cc pins them. It
+# offers to download them when they're missing, and the tools' --unattended runs answer no, so they go there first.
+$d3d12Runtime = @(
+    @{ Url = 'https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.9.2602.24/dxc_2026_05_27.zip'
+        Sha256 = 'cf658aacf070d3045e31b8f1f8a696c2945f37c1095019481ef7c513368db3b4'; Entry = 'bin/x64/dxil.dll'; Name = 'dxil.dll' }
+    @{ Url = 'https://www.nuget.org/api/v2/package/Microsoft.Direct3D.D3D12/1.619.3'
+        Sha256 = '43a7d5a3973812eb4b42623fae5275c790a005b8e48b8d7f5bb43cef39e073c5'
+        Entry = 'build/native/bin/x64/D3D12Core.dll'; Name = 'D3D12Core.dll' }
+)
 # Where it goes: xenia-edge\ beside this repository, unless that holds something else (a checkout, say).
 $xeniaFolder = "$parent\xenia-edge"
 if (Get-ChildItem $xeniaFolder -Force -ErrorAction SilentlyContinue | Select-Object -First 1) { $xeniaFolder = "$parent\xenia-edge-$xeniaTag" }
@@ -82,10 +93,45 @@ function Get-XeniaRelease {
     $exe.FullName
 }
 
+# Puts the Direct3D 12 runtime files missing from D3D12\ beside xenia_edge.exe, each checked against its SHA-256.
+function Install-D3D12Runtime([string]$exe) {
+    $folder = Join-Path (Split-Path $exe -Parent) 'D3D12'
+    foreach ($file in $d3d12Runtime) {
+        $target = Join-Path $folder $file.Name
+        if (Test-Path $target) { continue }
+        $download = Join-Path ([IO.Path]::GetTempPath()) "xboxngen-$($file.Name).zip"
+        Write-Host "Downloading $($file.Url) for $target"
+        Invoke-WebRequest $file.Url -OutFile $download -UserAgent 'XboxNGen-Configure' -UseBasicParsing
+        try {
+            $actual = (Get-FileHash $download -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $file.Sha256) { throw "its SHA-256 is $actual, not $($file.Sha256)" }
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            $zip = [IO.Compression.ZipFile]::OpenRead($download)
+            try {
+                $entry = $zip.GetEntry($file.Entry)
+                if (-not $entry) { throw "it has no $($file.Entry)" }
+                $null = New-Item -ItemType Directory $folder -Force
+                [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $target)
+            } finally { $zip.Dispose() }
+        } finally { Remove-Item $download -ErrorAction SilentlyContinue }
+    }
+}
+
+# Upstream xenia-edge's --disable_ui, which Run-Xenia.ps1 passes: builds of the silverlight-build branch of
+# jessenic/xenia-edge (the release XboxNGen used before) have --headless instead, and fail on it.
+function Test-XeniaFlags([string]$exe) {
+    [Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes($exe)).Contains('disable_ui needs unattended')
+}
+
 # Each location: how to recognise it, where it usually is, and what to ask.
 $items = [ordered]@{
-    Xenia = @{ Variable = 'XENIA_EDGE'; Test = { param($p) Test-Path $p -PathType Leaf }
-        # The silverlight-build release extracted beside this repository (README.md), else a build of its branch.
+    Xenia = @{ Variable = 'XENIA_EDGE'
+        Test = { param($p)
+            if (-not (Test-Path $p -PathType Leaf)) { return $false }
+            if (Test-XeniaFlags $p) { return $true }
+            Write-Warning "$p has no --disable_ui: it's an older xenia-edge (the silverlight-build branch); use upstream's"
+            $false }
+        # The release extracted beside this repository (README.md), else a build of xenia-edge there.
         Guesses = @(@(Get-ChildItem "$parent\xenia-edge", "$parent\xenia-edge-$xeniaTag" -Filter xenia_edge.exe -Depth 1 -ErrorAction SilentlyContinue |
                 ForEach-Object FullName) +
             "$parent\xenia-edge\build\bin\Windows\Release\xenia_edge.exe", "$parent\..\xenia-edge\build\bin\Windows\Release\xenia_edge.exe")
@@ -123,6 +169,9 @@ foreach ($name in $items.Keys) {
 }
 
 $config | ConvertTo-Json | Set-Content $jsonFile -Encoding utf8
+if ($config.Xenia) {
+    try { Install-D3D12Runtime $config.Xenia } catch { Write-Warning "Couldn't get xenia-edge's Direct3D 12 runtime files: $_" }
+}
 
 # make runs in WSL: C:\x\y is /mnt/c/x/y there.
 $mk = "# Written by tools\Configure.ps1.`n"
